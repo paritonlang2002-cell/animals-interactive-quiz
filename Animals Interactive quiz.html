@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Challenge</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #102d25, #235943);
+      color: #20352b;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 650px;
+      padding: 32px;
+      border-radius: 24px;
+      background: #fffdf5;
+      box-shadow: 0 20px 60px #0003;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand .logo {
+      font-size: 42px;
+    }
+
+    .brand h1 {
+      margin-top: 8px;
+      color: #205b3f;
+      font-size: 32px;
+    }
+
+    .brand p {
+      margin-top: 8px;
+      color: #68776c;
+    }
+
+    .top-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #41624f;
+    }
+
+    .progress-track {
+      height: 9px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #e3ebdf;
+    }
+
+    .progress {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #43a76b;
+      transition: width 0.3s ease;
+    }
+
+    .category {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 20px;
+      background: #e3f2e5;
+      color: #287346;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .question {
+      margin: 16px 0 22px;
+      font-size: 24px;
+      line-height: 1.4;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e8df;
+      border-radius: 14px;
+      background: white;
+      color: #293e31;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .option:hover:not(:disabled) {
+      border-color: #56a975;
+      background: #f3faf3;
+      transform: translateY(-1px);
+    }
+
+    .option:disabled {
+      cursor: default;
+    }
+
+    .option.correct {
+      border-color: #299653;
+      background: #e4f7e9;
+    }
+
+    .option.wrong {
+      border-color: #d95858;
+      background: #fff0ee;
+    }
+
+    .letter {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: #edf1e9;
+      font-weight: bold;
+    }
+
+    .feedback {
+      min-height: 28px;
+      margin-top: 18px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    .feedback.good {
+      color: #218348;
+    }
+
+    .feedback.bad {
+      color: #bf4646;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
+    .primary-btn {
+      padding: 13px 22px;
+      border: none;
+      border-radius: 12px;
+      background: #236b46;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .primary-btn:hover {
+      background: #174b31;
+    }
+
+    .primary-btn:disabled {
+      background: #a5b8aa;
+      cursor: not-allowed;
+    }
+
+    .result {
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .result-emoji {
+      font-size: 76px;
+      margin-bottom: 12px;
+    }
+
+    .result h2 {
+      color: #205b3f;
+      font-size: 30px;
+    }
+
+    .score {
+      margin: 20px 0;
+      font-size: 48px;
+      font-weight: bold;
+      color: #2e8c54;
+    }
+
+    .result p {
+      color: #617166;
+      line-height: 1.6;
+    }
+
+    .result .primary-btn {
+      margin-top: 24px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .hint {
+      margin-top: 22px;
+      text-align: center;
+      color: #7b897d;
+      font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 22px 18px;
+      }
+
+      .brand h1 {
+        font-size: 27px;
+      }
+
+      .question {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="logo">🦁🌿</div>
+      <h1>WildQuiz</h1>
+      <p>How much do you know about the animal kingdom?</p>
+    </header>
+
+    <section id="quizScreen">
+      <div class="top-line">
+        <span id="questionCount">Question 1 of 10</span>
+        <span id="scoreLabel">Score: 0</span>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress" id="progressBar"></div>
+      </div>
+
+      <span class="category" id="category">Mammals</span>
+      <h2 class="question" id="question">Loading question...</h2>
+
+      <div class="options" id="options"></div>
+
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+
+      <div class="footer">
+        <button class="primary-btn" id="nextBtn" disabled>
+          Next Question →
+        </button>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="result hidden">
+      <div class="result-emoji" id="resultEmoji">🏆</div>
+      <h2 id="resultTitle">Quiz Completed!</h2>
+      <div class="score" id="finalScore">0/10</div>
+      <p id="resultMessage"></p>
+      <button class="primary-btn" id="restartBtn">Play Again ↻</button>
+    </section>
+
+    <p class="hint">10 questions · Multiple choice · Learn something wild!</p>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        category: "Mammals",
+        question: "Which is the largest animal on Earth?",
+        options: ["African elephant", "Blue whale", "Giraffe", "Great white shark"],
+        answer: 1,
+        fact: "The blue whale is the largest known animal to have ever lived."
+      },
+      {
+        category: "Birds",
+        question: "Which bird is famous for its ability to mimic human speech?",
+        options: ["Penguin", "Ostrich", "African grey parrot", "Flamingo"],
+        answer: 2,
+        fact: "African grey parrots are renowned for their vocal learning and impressive mimicry."
+      },
+      {
+        category: "Reptiles",
+        question: "Which reptile can change its skin colour for communication and camouflage?",
+        options: ["Chameleon", "Crocodile", "Komodo dragon", "Tortoise"],
+        answer: 0,
+        fact: "Chameleons change colour for communication, temperature regulation and camouflage."
+      },
+      {
+        category: "Ocean Life",
+        question: "What is the only mammal capable of true sustained flight?",
+        options: ["Flying squirrel", "Sugar glider", "Bat", "Colugo"],
+        answer: 2,
+        fact: "Bats are the only mammals capable of powered, sustained flight."
+      },
+      {
+        category: "Mammals",
+        question: "What is a group of lions commonly called?",
+        options: ["Pack", "Pride", "Colony", "Herd"],
+        answer: 1,
+        fact: "A group of lions is called a pride."
+      },
+      {
+        category: "Animal Facts",
+        question: "Which animal has three hearts?",
+        options: ["Dolphin", "Octopus", "Sea turtle", "Jellyfish"],
+        answer: 1,
+        fact: "An octopus has three hearts: two pump blood to the gills, and one pumps it to the body."
+      },
+      {
+        category: "Wildlife",
+        question: "Which land animal is known for having the longest neck?",
+        options: ["Camel", "Ostrich", "Giraffe", "Llama"],
+        answer: 2,
+        fact: "The giraffe's long neck helps it reach high foliage and can also be used in competition."
+      },
+      {
+        category: "Insects",
+        question: "How many legs does an adult insect have?",
+        options: ["Four", "Six", "Eight", "Ten"],
+        answer: 1,
+        fact: "Adult insects have six legs, arranged in three pairs."
+      },
+      {
+        category: "Animal Intelligence",
+        question: "Which marine mammal is known for using echolocation?",
+        options: ["Dolphin", "Manatee", "Walrus", "Sea otter"],
+        answer: 0,
+        fact: "Dolphins use echolocation clicks and their returning echoes to locate objects and prey."
+      },
+      {
+        category: "Conservation",
+        question: "Which of these animals is a critically endangered great ape?",
+        options: ["Red kangaroo", "Mountain gorilla", "Common bottlenose dolphin", "Red fox"],
+        answer: 1,
+        fact: "Mountain gorillas are endangered, but their conservation status is currently Endangered, not Critically Endangered. This question needs a correction."
+      }
+    ];
+
+    // Use a clear, accurate conservation question.
+    questions[9] = {
+      category: "Conservation",
+      question: "Which of these animals is classified as Critically Endangered?",
+      options: ["Red panda", "Javan rhinoceros", "African elephant", "Grey wolf"],
+      answer: 1,
+      fact: "The Javan rhinoceros is Critically Endangered, with a very small surviving wild population."
+    };
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const quizScreen = document.getElementById("quizScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const questionCount = document.getElementById("questionCount");
+    const scoreLabel = document.getElementById("scoreLabel");
+    const progressBar = document.getElementById("progressBar");
+    const category = document.getElementById("category");
+    const questionText = document.getElementById("question");
+    const optionsContainer = document.getElementById("options");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function loadQuestion() {
+      answered = false;
+
+      const item = questions[currentQuestion];
+
+      questionCount.textContent =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+      scoreLabel.textContent = `Score: ${score}`;
+      progressBar.style.width =
+        `${(currentQuestion / questions.length) * 100}%`;
+
+      category.textContent = item.category;
+      questionText.textContent = item.question;
+      optionsContainer.innerHTML = "";
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      nextBtn.disabled = true;
+      nextBtn.textContent =
+        currentQuestion === questions.length - 1
+          ? "See Results 🏆"
+          : "Next Question →";
+
+      item.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.className = "option";
+        button.innerHTML =
+          `<span class="letter">${String.fromCharCode(65 + index)}</span>
+           <span>${option}</span>`;
+
+        button.addEventListener("click", () => selectAnswer(index, button));
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function selectAnswer(selectedIndex, selectedButton) {
+      if (answered) return;
+
+      answered = true;
+      const item = questions[currentQuestion];
+      const buttons = optionsContainer.querySelectorAll(".option");
+
+      buttons.forEach(button => {
+        button.disabled = true;
+      });
+
+      if (selectedIndex === item.answer) {
+        score++;
+        selectedButton.classList.add("correct");
+        feedback.textContent = `Correct! 🎉 ${item.fact}`;
+        feedback.classList.add("good");
+      } else {
+        selectedButton.classList.add("wrong");
+        buttons[item.answer].classList.add("correct");
+        feedback.textContent =
+          `Not quite! ${item.fact}`;
+        feedback.classList.add("bad");
+      }
+
+      scoreLabel.textContent = `Score: ${score}`;
+      nextBtn.disabled = false;
+    }
+
+    function showResults() {
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      progressBar.style.width = "100%";
+
+      const percentage = Math.round((score / questions.length) * 100);
+      document.getElementById("finalScore").textContent =
+        `${score}/${questions.length}`;
+
+      let emoji;
+      let title;
+      let message;
+
+      if (percentage >= 90) {
+        emoji = "🏆";
+        title = "Wildlife Expert!";
+        message = `Outstanding! You scored ${percentage}%. Your animal knowledge is impressive.`;
+      } else if (percentage >= 70) {
+        emoji = "🦊";
+        title = "Nature Champion!";
+        message = `Great work! You scored ${percentage}%. You know your way around the animal kingdom.`;
+      } else if (percentage >= 40) {
+        emoji = "🐼";
+        title = "Curious Explorer!";
+        message = `You scored ${percentage}%. Keep exploring—you've got plenty more fascinating animal facts to discover.`;
+      } else {
+        emoji = "🐣";
+        title = "Rookie Ranger!";
+        message = `You scored ${percentage}%. Every wildlife expert starts somewhere. Try again and see what you learn!`;
+      }
+
+      document.getElementById("resultEmoji").textContent = emoji;
+      document.getElementById("resultTitle").textContent = title;
+      document.getElementById("resultMessage").textContent = message;
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (!answered) return;
+
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      currentQuestion = 0;
+      score = 0;
+      answered = false;
+
+      resultScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+
+      loadQuestion();
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>
